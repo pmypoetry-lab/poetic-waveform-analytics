@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Poetic Divergence — minimal Streamlit app (unified with use_normalized)
+Poetic Divergence — minimal Streamlit app (model selectable)
 - 入力: テキスト貼り付け or DOCX アップロード
 - 出力: Divergence 波形（前3行との相対逸脱）、CSV（raw/normalized）
 - 依存: streamlit, numpy, pandas, matplotlib
@@ -65,24 +65,24 @@ def cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
 
 # ========= 埋め込み（SBERT → TF-IDF → BoW） =========
 @st.cache_resource(show_spinner=False)
-def load_sbert():
-    # 旧版に合わせる
-    return SentenceTransformer("all-MiniLM-L6-v2")
+def load_sbert(model_name: str):
+    # 引数（モデル名）でキャッシュキーが分かれる
+    return SentenceTransformer(model_name)
 
-def embed_lines(lines: list[str]) -> np.ndarray:
+def embed_lines(lines: list[str], model_name: str) -> np.ndarray:
     if len(lines) == 0:
         return np.zeros((0, 1), dtype=float)
 
     # 1) SBERT
     if _HAS_SBERT:
         try:
-            model = load_sbert()
+            model = load_sbert(model_name)
             vec = model.encode(lines, convert_to_numpy=True, normalize_embeddings=False)
             return np.asarray(vec, dtype=float)
         except Exception:
             pass
 
-    # 2) TF-IDF
+    # 2) TF-IDF（フォールバック）
     if _HAS_SKLEARN:
         try:
             tfidf = TfidfVectorizer()
@@ -91,7 +91,7 @@ def embed_lines(lines: list[str]) -> np.ndarray:
         except Exception:
             pass
 
-    # 3) 単純 BoW（文字ベース）
+    # 3) 単純 BoW（文字ベース・最終フォールバック）
     vocab = {}
     rows = []
     for ln in lines:
@@ -110,7 +110,7 @@ def embed_lines(lines: list[str]) -> np.ndarray:
 
 
 # ========= Divergence（前 window 行の平均ベクトルとの 1-cos 距離） =========
-def compute_divergence(lines: list[str], window: int = 3) -> tuple[np.ndarray, np.ndarray]:
+def compute_divergence(lines: list[str], window: int = 3, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2") -> tuple[np.ndarray, np.ndarray]:
     """
     returns: (raw, normalized)
     raw: 各行の 1−cos 距離（前 window 行の平均 vs 当詩行）
@@ -120,16 +120,16 @@ def compute_divergence(lines: list[str], window: int = 3) -> tuple[np.ndarray, n
         z = np.zeros((0,), dtype=float)
         return z, z
 
-    emb = embed_lines(lines)  # (n, d)
+    emb = embed_lines(lines, model_name=model_name)  # (n, d)
     n = emb.shape[0]
     raw = np.zeros(n, dtype=float)
 
     for t in range(n):
-        if t < window:           # ← 旧版準拠：window 揃うまで 0
+        if t < window:           # window 揃うまで 0（旧版互換仕様）
             raw[t] = 0.0
             continue
         ctx = emb[t-window:t].mean(axis=0)
-        denom = (np.linalg.norm(emb[t]) * np.linalg.norm(ctx)) or 1e-9  # ← 微小値保護
+        denom = (np.linalg.norm(emb[t]) * np.linalg.norm(ctx)) or 1e-9  # 微小値保護
         sim = float(np.dot(emb[t], ctx) / denom)
         raw[t] = max(0.0, 1.0 - sim)
 
@@ -145,6 +145,19 @@ st.caption("入力テキスト（またはDOCX）から、行ごとの Divergenc
 
 with st.sidebar:
     st.subheader("設定")
+    # --- 埋め込みモデル選択 ---
+    model_choice = st.selectbox(
+        "埋め込みモデル",
+        options=[
+            "paraphrase-multilingual-MiniLM-L12-v2",  # 多言語・日本語推奨
+            "all-MiniLM-L6-v2",                      # 英語寄り・旧版互換
+        ],
+        index=0,
+        help="日本語詩には多言語モデル（上）を推奨。旧分析の再現には all-MiniLM-L6-v2 を選択。"
+    )
+    if not _HAS_SBERT:
+        st.warning("sentence-transformers が未インストールのため、TF-IDF/BoW で代替します。requirements.txt に追加してください。")
+
     window = st.number_input("文脈ウィンドウ（直前の行数）", min_value=1, max_value=10, value=3, step=1)
     use_normalized = st.toggle("グラフを 0..1 正規化で表示", value=True)
     csv_mode = st.radio(
@@ -188,33 +201,35 @@ with tab2:
         st.stop()
 
     with st.spinner("Divergence 計算中…"):
-        raw, normed = compute_divergence(lines, window=window)
+        raw, normed = compute_divergence(lines, window=window, model_name=model_choice)
 
-    # ---- グラフ表示（use_normalized に追随）----
+    # ---- グラフ表示 ----
     y = normed if use_normalized else raw
     fig = plt.figure(figsize=(10, 3.5), dpi=150)
     plt.plot(np.arange(1, len(lines) + 1), y, linewidth=2)
     plt.xlabel("Line")
     plt.ylabel("Divergence " + ("(0..1 normalized)" if use_normalized else "(raw 1−cos)"))
-    plt.title("Divergence Waveform")
+    plt.title(f"Divergence Waveform  [{model_choice}]")
     plt.grid(alpha=0.3)
     st.pyplot(fig, clear_figure=True)
 
-    # ---- CSV 出力（csv_mode に追随）----
+    # ---- CSV 出力 ----
     df = pd.DataFrame({
         "line_index": np.arange(1, len(lines) + 1, dtype=int),
         "line_text": lines,
         "divergence_raw": raw,
-        "divergence_norm": normed
+        "divergence_norm": normed,
+        "embedding_model": [model_choice] * len(lines),
+        "window": [int(window)] * len(lines),
     })
     if csv_mode == "rawのみ":
-        out_df = df[["line_index", "line_text", "divergence_raw"]]
+        out_df = df[["line_index", "line_text", "divergence_raw", "embedding_model", "window"]]
         fname = "divergence_raw.csv"
     elif csv_mode == "normalizedのみ":
-        out_df = df[["line_index", "line_text", "divergence_norm"]]
+        out_df = df[["line_index", "line_text", "divergence_norm", "embedding_model", "window"]]
         fname = "divergence_normalized.csv"
     else:
-        out_df = df[["line_index", "line_text", "divergence_raw", "divergence_norm"]]
+        out_df = df[["line_index", "line_text", "divergence_raw", "divergence_norm", "embedding_model", "window"]]
         fname = "divergence_raw_and_normalized.csv"
 
     csv_buf = io.StringIO()
@@ -230,4 +245,6 @@ with tab2:
         "raw_range": [float(np.max(raw) - np.min(raw)) if len(raw) else 0.0],
         "norm_mean": [float(np.mean(normed)) if len(normed) else 0.0],
         "norm_range": [float(np.max(normed) - np.min(normed)) if len(normed) else 0.0],
+        "model": [model_choice],
+        "window": [int(window)],
     }))
