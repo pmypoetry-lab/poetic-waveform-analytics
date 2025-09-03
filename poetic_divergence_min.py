@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-
 import matplotlib.font_manager as fm
 
 # 日本語フォントを指定
@@ -221,9 +220,9 @@ with tab2:
     y = normed if use_normalized else raw
     fig = plt.figure(figsize=(10, 3.5), dpi=150)
     plt.plot(np.arange(1, len(lines) + 1), y, linewidth=2)
-    plt.xlabel("Line")
-    plt.ylabel("Divergence " + ("(0..1 normalized)" if use_normalized else "(raw 1−cos)"))
-    plt.title(f"Divergence Waveform  [{label}]")
+    plt.xlabel("行番号")   # 日本語でもOK
+    plt.ylabel("Divergence " + ("(0..1 正規化)" if use_normalized else "(raw 1−cos)"))
+    plt.title(f"Divergence 波形 [{label}]")
     plt.grid(alpha=0.3)
     st.pyplot(fig, clear_figure=True)
 
