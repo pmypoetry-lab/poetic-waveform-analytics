@@ -299,13 +299,14 @@ with tab2:
                        file_name=fname, mime="text/csv")
 
     # 概要統計
+
     st.caption("— 概要統計（参考） —")
     st.write(pd.DataFrame({
         "lines": [len(lines)],
-        "raw_mean": [float(np.mean(raw)) if len(raw) else 0.0],
-        "raw_range": [float(np.max(raw) - np.min(raw)) if len(raw) else 0.0],
-        "norm_mean": [float(np.mean(normed)) if len(normed) else 0.0],
-        "norm_range": [float(np.max(normed) - np.min(normed)) if len(normed) else 0.0],
+        "raw_mean": [float(np.mean(valid_raw)) if len(valid_raw) else 0.0],
+        "raw_range": [float(np.max(valid_raw) - np.min(valid_raw)) if len(valid_raw) else 0.0],
+        "norm_mean": [float(np.mean(valid_normed)) if len(valid_normed) else 0.0],
+        "norm_range": [float(np.max(valid_normed) - np.min(valid_normed)) if len(valid_normed) else 0.0],
         "model": [model_choice],
         "window": [int(window)],
     }))
