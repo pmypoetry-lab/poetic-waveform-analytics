@@ -140,21 +140,26 @@ def compute_divergence(lines: list[str], window: int = 3, model_name: str = "par
 # ========= Streamlit UI =========
 st.set_page_config(page_title="Poetic Divergence (minimal)", layout="centered")
 
-st.title("Divergence（詩的跳躍度）最小アプリ")
+st.title("Divergence（詩的跳躍度）波形描画アプリ")
 st.caption("入力テキスト（またはDOCX）から、行ごとの Divergence を計算して波形表示し、CSV を出力します。")
 
 with st.sidebar:
     st.subheader("設定")
-    # --- 埋め込みモデル選択 ---
-    model_choice = st.selectbox(
-        "埋め込みモデル",
-        options=[
-            "paraphrase-multilingual-MiniLM-L12-v2",  # 多言語・日本語推奨
-            "all-MiniLM-L6-v2",                      # 英語寄り・旧版互換
-        ],
-        index=0,
-        help="日本語詩には多言語モデル（上）を推奨。旧分析の再現には all-MiniLM-L6-v2 を選択。"
-    )
+
+# --- 埋め込みモデル選択（ラベル→IDのマッピング） ---
+MODEL_OPTIONS = {
+    "all-MiniLM-L6-v2（英語寄り）": "all-MiniLM-L6-v2",
+    "paraphrase-multilingual-MiniLM-L12-v2（多言語推奨）": "paraphrase-multilingual-MiniLM-L12-v2",
+}
+
+label = st.selectbox(
+    "埋め込みモデル",
+    options=list(MODEL_OPTIONS.keys()),
+    index=0,
+    help="簡易分析には all-MiniLM-L6-v2 を選択。日本語詩には多言語モデル（下）を推奨。"
+)
+model_choice = MODEL_OPTIONS[label]  # ← 実際に使うID
+
     if not _HAS_SBERT:
         st.warning("sentence-transformers が未インストールのため、TF-IDF/BoW で代替します。requirements.txt に追加してください。")
 
@@ -209,7 +214,7 @@ with tab2:
     plt.plot(np.arange(1, len(lines) + 1), y, linewidth=2)
     plt.xlabel("Line")
     plt.ylabel("Divergence " + ("(0..1 normalized)" if use_normalized else "(raw 1−cos)"))
-    plt.title(f"Divergence Waveform  [{model_choice}]")
+    plt.title(f"Divergence Waveform  [{label}]")
     plt.grid(alpha=0.3)
     st.pyplot(fig, clear_figure=True)
 
