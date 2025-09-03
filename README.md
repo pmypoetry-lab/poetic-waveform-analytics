@@ -25,7 +25,6 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 依存ライブラリは `requirements.txt` に記載しています。  
 以下で環境を準備できます。
 
-```bash
 git clone https://github.com/pmypoetry-lab/poetic-waveform-analytics.git
 cd poetic-waveform-analytics
 pip install -r requirements.txt
@@ -34,7 +33,6 @@ pip install -r requirements.txt
 
 ローカルで起動する場合:
 
-```bash
 streamlit run poetic_divergence_min.py
 
 ## ライセンス
