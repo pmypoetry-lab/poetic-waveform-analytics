@@ -13,6 +13,15 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
+import matplotlib.font_manager as fm
+
+# 日本語フォントを指定
+jp_font_path = "fonts/NotoSansJP-Regular.ttf"  # リポジトリ内のパス
+jp_font = fm.FontProperties(fname=jp_font_path)
+
+plt.rcParams["font.family"] = jp_font.get_name()
+
+
 # ========= オプショナル依存の確認 =========
 _HAS_SBERT = False
 _HAS_SKLEARN = False
