@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Poetic Divergence — minimal Streamlit app
+Poetic Divergence — minimal Streamlit app (unified with use_normalized)
 - 入力: テキスト貼り付け or DOCX アップロード
 - 出力: Divergence 波形（前3行との相対逸脱）、CSV（raw/normalized）
 - 依存: streamlit, numpy, pandas, matplotlib
@@ -8,13 +8,12 @@ Poetic Divergence — minimal Streamlit app
 """
 
 import io
-import os
 import numpy as np
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
-# ========= オプショナル依存の準備（あるものだけ使う） =========
+# ========= オプショナル依存の確認 =========
 _HAS_SBERT = False
 _HAS_SKLEARN = False
 _HAS_DOCX = False
@@ -64,7 +63,7 @@ def cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
     return max(0.0, 1.0 - sim)
 
 
-# ========= 埋め込み（可能なら SBERT、次点 TF-IDF、最後に単純Bag-of-words） =========
+# ========= 埋め込み（SBERT → TF-IDF → BoW） =========
 @st.cache_resource(show_spinner=False)
 def load_sbert():
     # 日本語も安定する多言語モデル
@@ -93,19 +92,18 @@ def embed_lines(lines: list[str]) -> np.ndarray:
         except Exception:
             pass
 
-    # 3) 単純 BoW（手作り）
+    # 3) 単純 BoW（文字ベース）
     vocab = {}
     rows = []
     for ln in lines:
-        toks = list(ln)
-        for t in toks:
-            if t not in vocab:
-                vocab[t] = len(vocab)
+        for ch in ln:
+            if ch not in vocab:
+                vocab[ch] = len(vocab)
     V = len(vocab)
     for ln in lines:
         v = np.zeros(V, dtype=float)
-        for t in ln:
-            idx = vocab.get(t)
+        for ch in ln:
+            idx = vocab.get(ch)
             if idx is not None:
                 v[idx] += 1.0
         rows.append(v)
@@ -113,7 +111,7 @@ def embed_lines(lines: list[str]) -> np.ndarray:
 
 
 # ========= Divergence（前 window 行の平均ベクトルとの 1-cos 距離） =========
-def compute_divergence(lines: list[str], window: int = 3, normalize: bool = True) -> tuple[np.ndarray, np.ndarray]:
+def compute_divergence(lines: list[str], window: int = 3) -> tuple[np.ndarray, np.ndarray]:
     """
     returns: (raw, normalized)
     raw: 各行の 1−cos 距離（前 window 行の平均 vs 当詩行）
@@ -135,7 +133,7 @@ def compute_divergence(lines: list[str], window: int = 3, normalize: bool = True
         ctx = emb[start:t].mean(axis=0)
         raw[t] = cosine_distance(emb[t], ctx)
 
-    normed = safe_minmax_scale(raw) if normalize else raw.copy()
+    normed = safe_minmax_scale(raw)
     return raw, normed
 
 
@@ -148,8 +146,14 @@ st.caption("入力テキスト（またはDOCX）から、行ごとの Divergenc
 with st.sidebar:
     st.subheader("設定")
     window = st.number_input("文脈ウィンドウ（直前の行数）", min_value=1, max_value=10, value=3, step=1)
-    use_normalized = st.toggle("0..1 に正規化して表示/出力", value=True)
-    st.caption("※ 正規化は詩内の相対比較に便利です。raw は生の 1−cos 値。")
+    use_normalized = st.toggle("グラフを 0..1 正規化で表示", value=True)
+    csv_mode = st.radio(
+        "CSVに含める列",
+        ["rawのみ", "normalizedのみ", "rawとnormalized（両方）"],
+        index=2,
+        horizontal=False
+    )
+    st.caption("※ 表示とCSVは独立設定です。")
 
 tab1, tab2 = st.tabs(["テキスト入力 / DOCX", "結果"])
 
@@ -162,8 +166,8 @@ with tab1:
     if up is not None and _HAS_DOCX:
         try:
             doc = docx.Document(up)
-            raw = "\n".join([p.text for p in doc.paragraphs])
-            lines = split_poem_lines(raw)
+            raw_txt = "\n".join(p.text for p in doc.paragraphs)
+            lines = split_poem_lines(raw_txt)
             st.success(f"DOCX から {len(lines)} 行を読み取りました。")
         except Exception as e:
             st.error(f"DOCX 読み取りに失敗: {e}")
@@ -184,41 +188,46 @@ with tab2:
         st.stop()
 
     with st.spinner("Divergence 計算中…"):
-        raw, normed = compute_divergence(lines, window=window, normalize=True)
+        raw, normed = compute_divergence(lines, window=window)
 
+    # ---- グラフ表示（use_normalized に追随）----
     y = normed if use_normalized else raw
+    fig = plt.figure(figsize=(10, 3.5), dpi=150)
+    plt.plot(np.arange(1, len(lines) + 1), y, linewidth=2)
+    plt.xlabel("Line")
+    plt.ylabel("Divergence " + ("(0..1 normalized)" if use_normalized else "(raw 1−cos)"))
+    plt.title("Divergence Waveform")
+    plt.grid(alpha=0.3)
+    st.pyplot(fig, clear_figure=True)
+
+    # ---- CSV 出力（csv_mode に追随）----
     df = pd.DataFrame({
         "line_index": np.arange(1, len(lines) + 1, dtype=int),
         "line_text": lines,
         "divergence_raw": raw,
         "divergence_norm": normed
     })
+    if csv_mode == "rawのみ":
+        out_df = df[["line_index", "line_text", "divergence_raw"]]
+        fname = "divergence_raw.csv"
+    elif csv_mode == "normalizedのみ":
+        out_df = df[["line_index", "line_text", "divergence_norm"]]
+        fname = "divergence_normalized.csv"
+    else:
+        out_df = df[["line_index", "line_text", "divergence_raw", "divergence_norm"]]
+        fname = "divergence_raw_and_normalized.csv"
 
-    # ---- 波形描画 ----
-    fig = plt.figure(figsize=(10, 3.5), dpi=150)
-    plt.plot(np.arange(1, len(lines) + 1), y, linewidth=2)
-    plt.xlabel("Line")
-    plt.ylabel("Divergence" + (" (0..1)" if use_normalized else " (raw 1−cos)"))
-    plt.title("Divergence Waveform")
-    plt.grid(alpha=0.3)
-    st.pyplot(fig, clear_figure=True)
-
-    # ---- CSV ダウンロード ----
     csv_buf = io.StringIO()
-    # 出力カラムは最小限（波形と行テキストに限定）
-    out_cols = ["line_index", "line_text", "divergence_raw", "divergence_norm"]
-    df[out_cols].to_csv(csv_buf, index=False)
-    st.download_button(
-        label="CSVをダウンロード",
-        data=csv_buf.getvalue().encode("utf-8-sig"),
-        file_name="divergence_scores.csv",
-        mime="text/csv"
-    )
+    out_df.to_csv(csv_buf, index=False)
+    st.download_button("CSVをダウンロード", csv_buf.getvalue().encode("utf-8-sig"),
+                       file_name=fname, mime="text/csv")
 
-    # 簡単な統計
+    # 概要統計
     st.caption("— 概要統計（参考） —")
     st.write(pd.DataFrame({
         "lines": [len(lines)],
         "raw_mean": [float(np.mean(raw)) if len(raw) else 0.0],
-        "raw_range": [float(np.max(raw) - np.min(raw)) if len(raw) else 0.0]
+        "raw_range": [float(np.max(raw) - np.min(raw)) if len(raw) else 0.0],
+        "norm_mean": [float(np.mean(normed)) if len(normed) else 0.0],
+        "norm_range": [float(np.max(normed) - np.min(normed)) if len(normed) else 0.0],
     }))
