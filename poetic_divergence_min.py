@@ -44,14 +44,12 @@ def use_japanese_font() -> tuple[FontProperties | None, str]:
             try:
                 fm.fontManager.addfont(path)
                 prop = FontProperties(fname=path)
-                family = prop.get_name()          # ← 内部family名（例: "Noto Sans JP"）
+                family = prop.get_name()  # ← 内部family名（例: "Noto Sans JP"）
                 matplotlib.rcParams["font.family"] = family
                 matplotlib.rcParams["font.sans-serif"] = [family]
                 return prop, family
             except Exception:
                 pass
-
-              return prop, fam
 
     return None, ""  # どうしても見つからない場合
 
