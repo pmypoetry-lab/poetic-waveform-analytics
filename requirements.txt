@@ -4,3 +4,4 @@ matplotlib
 sentence-transformers
 python-docx
 scikit-learn
+TF-IDF/BoW
