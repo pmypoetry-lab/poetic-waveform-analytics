@@ -66,9 +66,8 @@ def cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
 # ========= 埋め込み（SBERT → TF-IDF → BoW） =========
 @st.cache_resource(show_spinner=False)
 def load_sbert():
-    # 日本語も安定する多言語モデル
-    model_name = "paraphrase-multilingual-MiniLM-L12-v2"
-    return SentenceTransformer(model_name)
+    # 旧版に合わせる
+    return SentenceTransformer("all-MiniLM-L6-v2")
 
 def embed_lines(lines: list[str]) -> np.ndarray:
     if len(lines) == 0:
@@ -126,12 +125,13 @@ def compute_divergence(lines: list[str], window: int = 3) -> tuple[np.ndarray, n
     raw = np.zeros(n, dtype=float)
 
     for t in range(n):
-        start = max(0, t - window)
-        if start >= t:
-            raw[t] = 0.0  # 文脈がない先頭付近は 0
+        if t < window:           # ← 旧版準拠：window 揃うまで 0
+            raw[t] = 0.0
             continue
-        ctx = emb[start:t].mean(axis=0)
-        raw[t] = cosine_distance(emb[t], ctx)
+        ctx = emb[t-window:t].mean(axis=0)
+        denom = (np.linalg.norm(emb[t]) * np.linalg.norm(ctx)) or 1e-9  # ← 微小値保護
+        sim = float(np.dot(emb[t], ctx) / denom)
+        raw[t] = max(0.0, 1.0 - sim)
 
     normed = safe_minmax_scale(raw)
     return raw, normed
