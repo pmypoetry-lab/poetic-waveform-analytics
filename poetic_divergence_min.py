@@ -146,21 +146,21 @@ st.caption("入力テキスト（またはDOCX）から、行ごとの Divergenc
 with st.sidebar:
     st.subheader("設定")
 
-# --- 埋め込みモデル選択（ラベル→IDのマッピング） ---
-MODEL_OPTIONS = {
-    "all-MiniLM-L6-v2（英語寄り）": "all-MiniLM-L6-v2",
-    "paraphrase-multilingual-MiniLM-L12-v2（多言語推奨）": "paraphrase-multilingual-MiniLM-L12-v2",
-}
+    # --- 埋め込みモデル選択（ラベル→IDのマッピング） ---
+    MODEL_OPTIONS = {
+        "all-MiniLM-L6-v2（英語寄り）": "all-MiniLM-L6-v2",
+        "paraphrase-multilingual-MiniLM-L12-v2（多言語推奨）": "paraphrase-multilingual-MiniLM-L12-v2",
+    }
 
-label = st.selectbox(
-    "埋め込みモデル",
-    options=list(MODEL_OPTIONS.keys()),
-    index=0,
-    help="簡易分析には all-MiniLM-L6-v2 を選択。日本語詩には多言語モデル（下）を推奨。"
-)
-model_choice = MODEL_OPTIONS[label]  # ← 実際に使うID
+    label = st.selectbox(
+        "埋め込みモデル",
+        options=list(MODEL_OPTIONS.keys()),
+        index=0,
+        help="簡易分析には all-MiniLM-L6-v2 を選択。日本語詩には多言語モデル（下）を推奨。"
+    )
+    model_choice = MODEL_OPTIONS[label]  # ← 実際に使うID
 
-    if not_HAS_SBERT:
+    if not _HAS_SBERT:
         st.warning("sentence-transformers が未インストールのため、TF-IDF/BoW で代替します。requirements.txt に追加してください。")
 
     window = st.number_input("文脈ウィンドウ（直前の行数）", min_value=1, max_value=10, value=3, step=1)
