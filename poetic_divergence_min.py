@@ -14,6 +14,56 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
+import os
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import font_manager as fm
+from matplotlib.font_manager import FontProperties
+
+def use_japanese_font() -> tuple[FontProperties | None, str]:
+    """
+    リポジトリ同梱フォントを優先して登録し、使用中の family 名を返す。
+    戻り値: (FontProperties or None, family_name or "")
+    """
+    # 1) リポジトリ同梱候補（置いた実ファイル名に合わせて並べる）
+    candidates = [
+        "fonts/NotoSansJP-Bold.ttf",
+        "fonts/NotoSansJP-Regular.ttf",
+        "fonts/NotoSerifJP-Bold.ttf",
+        "fonts/NotoSerifJP-Regular.ttf"
+    ]
+
+    # DejaVuは日本語NGなので無効化
+    matplotlib.rcParams["axes.unicode_minus"] = False
+    matplotlib.rcParams["pdf.fonttype"] = 42
+    matplotlib.rcParams["ps.fonttype"] = 42
+
+    # --- 同梱TTFを優先して addfont し、family 名を取得 ---
+    for path in candidates:
+        if os.path.exists(path):
+            try:
+                fm.fontManager.addfont(path)
+                prop = FontProperties(fname=path)
+                family = prop.get_name()          # ← 内部family名（例: "Noto Sans JP"）
+                matplotlib.rcParams["font.family"] = family
+                matplotlib.rcParams["font.sans-serif"] = [family]
+                return prop, family
+            except Exception:
+                pass
+
+              return prop, fam
+
+    return None, ""  # どうしても見つからない場合
+
+# 一度だけ実行
+_JP_PROP, _JP_FAMILY = use_japanese_font()
+try:
+    import streamlit as st
+    st.caption(f"matplotlibフォント: {_JP_FAMILY or '未設定（フォールバック）'}")
+except Exception:
+    pass
+
+
 # 日本語フォントを指定
 jp_font_path = "fonts/NotoSansJP-Regular.ttf"  # リポジトリ内のパス
 jp_font = fm.FontProperties(fname=jp_font_path)
