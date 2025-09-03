@@ -160,7 +160,7 @@ label = st.selectbox(
 )
 model_choice = MODEL_OPTIONS[label]  # ← 実際に使うID
 
-    if not _HAS_SBERT:
+    if not_HAS_SBERT:
         st.warning("sentence-transformers が未インストールのため、TF-IDF/BoW で代替します。requirements.txt に追加してください。")
 
     window = st.number_input("文脈ウィンドウ（直前の行数）", min_value=1, max_value=10, value=3, step=1)
