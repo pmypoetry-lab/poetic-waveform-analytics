@@ -1,4 +1,6 @@
 streamlit
 pandas
 matplotlib
+sentence-transformers
 python-docx
+scikit-learn
