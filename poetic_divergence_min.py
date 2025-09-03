@@ -298,8 +298,13 @@ with tab2:
     st.download_button("CSVをダウンロード", csv_buf.getvalue().encode("utf-8-sig"),
                        file_name=fname, mime="text/csv")
 
-    # 概要統計
+    # ---- CSV 出力まで終わったあと ----
 
+    # === 概要統計用に「冒頭 window 行」を除外 ===
+    valid_raw = raw[window:] if len(raw) > window else np.array([])
+    valid_normed = normed[window:] if len(normed) > window else np.array([])
+
+    # === 概要統計 ===
     st.caption("— 概要統計（参考） —")
     st.write(pd.DataFrame({
         "lines": [len(lines)],
