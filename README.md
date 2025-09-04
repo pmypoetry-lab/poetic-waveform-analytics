@@ -28,10 +28,11 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 
 依存ライブラリは `requirements.txt` に記載しています。  
 以下で環境を準備できます。
-
+"""
 git clone https://github.com/pmypoetry-lab/poetic-waveform-analytics.git
 cd poetic-waveform-analytics
 pip install -r requirements.txt
+"""
 
 
 
