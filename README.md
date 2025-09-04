@@ -8,6 +8,8 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 
 [公開アプリはこちら](https://poetic-waveform-analytics.streamlit.app/)
 
+
+
 ## 背景
 本プロジェクトは「詩の数値化／Poetic Cybermetrics」をテーマにしています。  
 従来の詩学や批評を補完する新しい方法として、  
@@ -20,6 +22,8 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 数値化は外部に伝えるためだけでなく、創作者自身が自らの言葉の揺らぎを見つめ直すための装置でもあります。
 戯画的に言えば、詩人の感覚（勘）に測定装置（計器盤）を接続する方法の開発を目指しています。
 
+
+
 ## セットアップ
 
 依存ライブラリは `requirements.txt` に記載しています。  
@@ -29,13 +33,22 @@ git clone https://github.com/pmypoetry-lab/poetic-waveform-analytics.git
 cd poetic-waveform-analytics
 pip install -r requirements.txt
 
+
+
 ## 使い方
 
 ローカルで起動する場合:
 
 streamlit run poetic_divergence_min.py
 
+
+
 ## ライセンス
 MIT License.  
 このリポジトリは自由に利用・改変・配布できます。  
 詳細は [LICENSE](./LICENSE) をご覧ください。
+
+
+## 謝辞
+本プロジェクトは、詩的知性（Poetic Intelligence）の探究の一環として進められています。  
+詩と計算技術の交差点に関心を寄せるすべての人に感謝します。
