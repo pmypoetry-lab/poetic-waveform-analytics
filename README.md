@@ -6,7 +6,7 @@
 詩行ごとの **Divergence（詩的跳躍度）** を埋め込みモデルを用いて計算し、  
 Streamlit アプリでインタラクティブに分析・描画できます。
 
-[公開アプリはこちら](https://poetic-waveform-analytics.streamlit.app/)
+[公開アプリはこちら](https://poetic-waveform-analytics-divergence.streamlit.app/)
 
 
 
