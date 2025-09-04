@@ -33,7 +33,7 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 git clone https://github.com/pmypoetry-lab/poetic-waveform-analytics.git
 cd poetic-waveform-analytics
 pip install -r requirements.txt
-
+```
 
 
 
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ローカルで起動する場合:
 
-streamlit run poetic_divergence_min.py
+```streamlit run poetic_divergence_min.py```
 
 
 
