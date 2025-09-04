@@ -1,6 +1,6 @@
-# Poetic Waveform Analytics
+# Poetic Cybermetrics — 詩のサイバメトリクス
 
-**Poetic Cybermetrics — 詩のサイバメトリクス**
+**Poetic Waveform Analytics**
 
 このリポジトリは、詩を「数値化」して波形として可視化する実験的プロジェクトです。  
 詩行ごとの **Divergence（詩的跳躍度）** を埋め込みモデルを用いて計算し、  
