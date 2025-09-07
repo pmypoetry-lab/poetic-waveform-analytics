@@ -20,7 +20,7 @@ Streamlit アプリでインタラクティブに分析・描画できます。
    * 参照は直前 k 行（k 任意）
 
 2. **４モデル比較版**  
-   [poetic-waveform-analytics-divergence_4models.streamlit.app](https://poetic-waveform-analytics-divergence_4models.streamlit.app/)
+   [poetic-waveform-analytics-divergence-4models.streamlit.app](https://poetic-waveform-analytics-divergence-4models.streamlit.app/)
 
    * SBERT（英語寄り / 多言語対応）
    * OpenAI Embeddings（small / large）
