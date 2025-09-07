@@ -11,6 +11,7 @@ import io
 import numpy as np
 import pandas as pd
 import streamlit as st
+from typing import List
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
@@ -19,6 +20,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import font_manager as fm
 from matplotlib.font_manager import FontProperties
+
+# ← 最初の Streamlit コマンドとして
+st.set_page_config(page_title="Poetic Divergence (minimal)", layout="centered")
 
 def use_japanese_font() -> tuple[FontProperties | None, str]:
     """
@@ -194,10 +198,18 @@ def compute_divergence(lines: list[str], window: int = 3, model_name: str = "par
 
 
 # ========= Streamlit UI =========
-st.set_page_config(page_title="Poetic Divergence (minimal)", layout="centered")
 
-st.title("Divergence（詩的跳躍度）波形描画アプリ")
-st.caption("入力テキスト（またはDOCX）から、行ごとの Divergence を計算して波形表示し、CSV を出力します。")
+def main():
+    st.title("Divergence（詩的跳躍度）波形描画アプリ")
+    st.caption("入力テキスト（またはDOCX）から、行ごとの Divergence を計算して波形表示し、CSV を出力します。")
+
+    # 以降すべてのUI・計算・描画ロジック…
+    # st.write(...) / st.file_uploader(...) / グラフ作成 etc.
+
+if __name__ == "__main__":
+    main()
+
+
 
 with st.sidebar:
     st.subheader("設定")
