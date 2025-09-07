@@ -50,8 +50,6 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 
 各詩行ベクトル `x_i` と参照ベクトル `ref_i` のコサイン類似度に基づき、次のように定義します：
 
- $\displaystyle D_i = 1 - \cos(x_i, ref_i)$
-
 $$
 D_i = 1 - \cos(x_i, ref_i)
 $$
