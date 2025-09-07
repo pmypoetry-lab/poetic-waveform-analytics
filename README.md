@@ -12,16 +12,20 @@ Streamlit アプリでインタラクティブに分析・描画できます。
 
 現在、このリポジトリから以下の 2 種のアプリを公開しています：
 
-1. **単一モデル版**(https://poetic-waveform-analytics-divergence.streamlit.app/)  
-   - SBERT 系モデル （英語寄り / 多言語対応）   
-   入力テキストの Divergence 波形を描画します。（直前k行の文脈と比較します。kは任意。）
+1. **単一モデル版**  
+   [poetic-waveform-analytics-divergence.streamlit.app](https://poetic-waveform-analytics-divergence.streamlit.app/)  
+   - SBERT 系モデル（英語寄り / 多言語対応）  
+   - 入力テキストの Divergence 波形を描画  
+   - 参照は直前 k 行（k 任意）
 
-2. **４モデル比較版**(https://poetic-waveform-analytics-divergence_4models.streamlit.app/)  
+2. **４モデル比較版**  
+   [poetic-waveform-analytics-divergence_4models.streamlit.app](https://poetic-waveform-analytics-divergence_4models.streamlit.app/)  
    - SBERT（英語寄り / 多言語対応）  
    - OpenAI Embeddings（small / large）  
    - Ruri-v3-30m  
-   の４モデルを同一入力で比較し、**重ね描画** と **CSV（wide 形式）出力** を行います。
-　　（直前3行の文脈と比較します。k=3に固定。）
+   - ４モデルの波形を比較・重ね描画  
+   - CSV（wide形式）出力に対応  
+   - 参照は直前3行（k=3固定）
 
 
 
