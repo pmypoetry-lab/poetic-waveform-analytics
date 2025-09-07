@@ -22,6 +22,9 @@ import streamlit as st
 import matplotlib
 from matplotlib import font_manager as fm
 
+font_path = os.path.join(os.path.dirname(__file__), "fonts", "NotoSansCJK-Regular.ttc")
+jp_font = fm.FontProperties(fname=font_path)
+
 # リポジトリ直下 fonts/ に同梱したフォントを登録
 local_font = os.path.join(os.path.dirname(__file__), "fonts", "NotoSansJP-Regular.ttf")
 if os.path.exists(local_font):
