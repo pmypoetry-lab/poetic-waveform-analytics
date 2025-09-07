@@ -84,24 +84,29 @@ D_i = 1 - \cos(x_i, ref_i)
 
 
 
-## セットアップ
+---
 
-依存ライブラリは `requirements.txt` に記載しています。  
-以下で環境を準備できます。
+## アプリの基本的な使い方
 
-```bash
-git clone https://github.com/pmypoetry-lab/poetic-waveform-analytics.git
-cd poetic-waveform-analytics
-pip install -r requirements.txt
-```
+1. **詩行を入力またはアップロード**  
+   - テキストボックスに直接入力、または `.txt` / `.docx` ファイルをアップロードします。  
+   - 行ごとに分割され、波形解析の対象となります。  
 
+2. **モデルを選択**  
+   - サイドバーから SBERT / OpenAI / Ruri などを選びます。  
+   - 「４モデル比較版」では、全てのモデルが同時に走ります。  
 
+3. **波形を確認**  
+   - 各詩行の Divergence（跳躍度）が折れ線グラフとして描画されます。  
+   - 正規化／raw の切り替えも可能です。  
 
-## 使い方
+4. **データを保存**  
+   - 結果を CSV 形式でダウンロードできます。  
+   - 「４モデル比較版」では **wide 形式 CSV** として、各モデルの波形が横並びで出力されます。  
 
-ローカルで起動する場合:
-
-```streamlit run poetic_divergence_min.py```
+> 💡 **Tips**  
+> - OpenAI Embeddings を利用する場合は API Key が必須です。  
+> - アップロードされたテキストはセッション終了とともに破棄されます。  
 
 
 
