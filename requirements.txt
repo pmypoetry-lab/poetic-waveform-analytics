@@ -1,7 +1,20 @@
-streamlit
-pandas
-matplotlib
-numpy
-sentence-transformers
-scikit-learn
-python-docx
+# Core
+streamlit==1.37.1
+rich==13.7.1
+numpy==2.3.2
+pandas==2.3.2
+matplotlib==3.10.6
+python-docx==1.2.0
+openai==1.106.1
+
+
+# PyTorch (CPU) / SBERT 周辺（Py3.13対応帯）/ Ruri系
+transformers==4.56.1
+tokenizers==0.22.0          # ← ここを 0.22.0 に
+huggingface_hub==0.34.4
+safetensors==0.4.5
+sentencepiece==0.2.1
+protobuf==4.25.8
+sentence-transformers==2.7.0
+
+torch==2.8.0
