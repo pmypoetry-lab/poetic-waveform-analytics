@@ -462,7 +462,7 @@ with st.sidebar:
         extra_note = "（secrets/env/入力で API Key 取得）"
 
     elif backend == "Ruri-v3-30m":
-        model_choice = st.text_input("Ruri モデルID", "cl-nagoya/ruri-v3-30m")
+        model_choice = st.text_input("Ruri モデルID", "cl-nagoya/ruri-v3-30m（日本語特化）")
         max_seq_len = st.number_input("max_seq_length", 32, 512, 128, step=16)
         batch_size = st.number_input("batch_size", 1, 64, 8, step=1)
 
