@@ -18,18 +18,24 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-# --- 日本語フォント設定（pyplot 前に） ---
 import matplotlib
-from matplotlib import font_manager as fm
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 
-font_path = os.path.join(os.path.dirname(__file__), "fonts", "NotoSansCJK-Regular.ttc")
-jp_font = fm.FontProperties(fname=font_path)
+# --- 日本語フォント設定（公開/非公開 共通対策） ---
+BASE_DIR = os.path.dirname(__file__)
 
-# リポジトリ直下 fonts/ に同梱したフォントを登録
-local_font = os.path.join(os.path.dirname(__file__), "fonts", "NotoSansJP-Regular.ttf")
-if os.path.exists(local_font):
-    fm.fontManager.addfont(local_font)
-    matplotlib.rcParams["font.family"] = ["Noto Sans JP"]  # ← 実際のファミリ名に合わせる
+# まず TTC を指定
+ttc_font = os.path.join(BASE_DIR, "fonts", "NotoSansCJK-Regular.ttc")
+# 追加で TTF を指定
+ttf_font = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
+
+if os.path.exists(ttf_font):
+    fm.fontManager.addfont(ttf_font)
+    matplotlib.rcParams["font.family"] = ["Noto Sans JP"]
+elif os.path.exists(ttc_font):
+    jp_font = fm.FontProperties(fname=ttc_font)
+    matplotlib.rcParams["font.family"] = jp_font.get_name()
 else:
     # 無ければOS依存フォントへフォールバック
     matplotlib.rcParams["font.family"] = ["Yu Gothic", "Meiryo", "DejaVu Sans"]
@@ -37,10 +43,8 @@ else:
 matplotlib.rcParams["axes.unicode_minus"] = False
 # --- end font setup ---
 
-import matplotlib.pyplot as plt  # フォント設定の後で
-
-
 WINDOW_K = 3  # rolling window size
+
 
 # ===== Optional deps detection =====
 _HAS_DOCX = False
