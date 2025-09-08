@@ -22,26 +22,47 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 
+
+
 # --- 日本語フォント設定（公開/非公開 共通対策） ---
-BASE_DIR = os.path.dirname(__file__)
+import os, matplotlib
+import matplotlib.font_manager as fm
+from matplotlib.font_manager import FontProperties
+from pathlib import Path
 
-# まず TTC を指定
-ttc_font = os.path.join(BASE_DIR, "fonts", "NotoSansCJK-Regular.ttc")
-# 追加で TTF を指定
-ttf_font = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
+BASE_DIR = Path(__file__).resolve().parent
 
-if os.path.exists(ttf_font):
-    fm.fontManager.addfont(ttf_font)
-    matplotlib.rcParams["font.family"] = ["Noto Sans JP"]
-elif os.path.exists(ttc_font):
-    jp_font = fm.FontProperties(fname=ttc_font)
-    matplotlib.rcParams["font.family"] = jp_font.get_name()
+# 探索候補（src/fonts と repo 直下 fonts の両方を見る）
+candidates = [
+    BASE_DIR / "fonts" / "NotoSansJP-Regular.ttf",
+    BASE_DIR / "fonts" / "NotoSansJP-Bold.ttf",
+    Path.cwd() / "fonts" / "NotoSansJP-Regular.ttf",
+    Path.cwd() / "fonts" / "NotoSansJP-Bold.ttf",
+]
+
+family = None
+for p in candidates:
+    if p.exists():
+        try:
+            fm.fontManager.addfont(str(p))         # ← 実体を登録
+            prop = FontProperties(fname=str(p))
+            family = prop.get_name()               # 例: "Noto Sans JP"
+            break
+        except Exception:
+            pass
+
+if family:
+    matplotlib.rcParams["font.family"] = family
+    matplotlib.rcParams["font.sans-serif"] = [family]
 else:
-    # 無ければOS依存フォントへフォールバック
-    matplotlib.rcParams["font.family"] = ["Yu Gothic", "Meiryo", "DejaVu Sans"]
+    # 最終フォールバック（Linux想定）
+    matplotlib.rcParams["font.family"] = ["Noto Sans CJK JP", "IPAGothic", "DejaVu Sans"]
+    matplotlib.rcParams["font.sans-serif"] = ["Noto Sans CJK JP", "IPAGothic", "DejaVu Sans"]
 
 matplotlib.rcParams["axes.unicode_minus"] = False
 # --- end font setup ---
+
+
 
 WINDOW_K = 3  # rolling window size
 
