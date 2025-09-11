@@ -30,7 +30,7 @@ Streamlit アプリでインタラクティブに分析・描画できます。
    * 参照は直前3行（k=3固定）
 
 Streamlitの仕様により、一定時間アクセスが無い場合、アプリはスリープ状態に入りますが構わずに叩き起こしてください。数分後、リビルドされて起き上がります。
-<img width="75" height="38" alt="image" src="https://github.com/user-attachments/assets/18e38213-56f2-4c4f-bdc9-8a670af89a89" />
+<img width="385" height="190" alt="image" src="https://github.com/user-attachments/assets/18e38213-56f2-4c4f-bdc9-8a670af89a89" />
 
 
 ---
